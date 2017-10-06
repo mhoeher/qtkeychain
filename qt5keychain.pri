@@ -5,46 +5,52 @@
 QT5KEYCHAIN_PWD = $$PWD
 
 CONFIG *= depend_includepath
-DEFINES += QTKEYCHAIN_NO_EXPORT
-#CONFIG += plaintextstore
+DEFINES *= QTKEYCHAIN_NO_EXPORT
+#CONFIG *= plaintextstore
 
-INCLUDEPATH += \
+INCLUDEPATH *= \
     $$PWD/.. \
     $$QT5KEYCHAIN_PWD
 
-HEADERS += \
+HEADERS *= \
     $$QT5KEYCHAIN_PWD/keychain_p.h \
-    $$QT5KEYCHAIN_PWD/keychain.h
+    $$QT5KEYCHAIN_PWD/keychain.h \
+    $$QT5KEYCHAIN_PWD/plaintextstore_p.h
 
 SOURCES *= \
-    $$QT5KEYCHAIN_PWD/keychain.cpp
+    $$QT5KEYCHAIN_PWD/keychain.cpp \
+    $$QT5KEYCHAIN_PWD/plaintextstore.cpp \
+    $$QT5KEYCHAIN_PWD/libsecret.cpp
 
-plaintextstore {
-    HEADERS += $$QT5KEYCHAIN_PWD/plaintextstore_p.h
-    SOURCES += $$QT5KEYCHAIN_PWD/plaintextstore.cpp
-} else {
-    unix:!macx {
-        QT += dbus
+unix:!macx:!android:!ios {
+    QT *= dbus
 
-        HEADERS += $$QT5KEYCHAIN_PWD/gnomekeyring_p.h
+    HEADERS *= $$QT5KEYCHAIN_PWD/gnomekeyring_p.h
 
-        SOURCES += \
-            $$QT5KEYCHAIN_PWD/gnomekeyring.cpp \
-            $$QT5KEYCHAIN_PWD/keychain_unix.cpp
-    }
+    SOURCES *= \
+        $$QT5KEYCHAIN_PWD/gnomekeyring.cpp \
+        $$QT5KEYCHAIN_PWD/keychain_unix.cpp
 
-    win {
-        HEADERS += $$QT5KEYCHAIN_PWD/libsecret_p.h
-
-        SOURCES += \
-            $$QT5KEYCHAIN_PWD/keychain_win.cpp \
-            $$QT5KEYCHAIN_PWD/libsecret.cpp
-
-        #DBUS_INTERFACES += $$PWD/Keychain/org.kde.KWallet.xml
-    }
-
-    mac {
-        LIBS += "-framework Security" "-framework Foundation"
-        SOURCES += $$QT5KEYCHAIN_PWD/keychain_mac.cpp
-    }
+    DBUS_INTERFACES *= $$QT5KEYCHAIN_PWD/org.kde.KWallet.xml
 }
+
+android {
+    QT *= androidextras
+    SOURCES *= \
+        $$QT5KEYCHAIN_PWD/keychain_android.cpp \
+        $$QT5KEYCHAIN_PWD/androidkeystore.cpp
+}
+
+win32 {
+    HEADERS *= $$QT5KEYCHAIN_PWD/libsecret_p.h
+
+    SOURCES *= \
+        $$QT5KEYCHAIN_PWD/keychain_win.cpp
+    LIBS *= -lcrypt32
+}
+
+mac {
+    LIBS *= "-framework Security" "-framework Foundation"
+    SOURCES *= $$QT5KEYCHAIN_PWD/keychain_mac.cpp
+}
+
